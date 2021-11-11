@@ -1,1 +1,1 @@
-# tiny_lexer
+# Tiny Lexer
