@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   Lexer lexer(code);
   vector<Token> tokens = lexer.get_tokens();
 
-  bool display_comments = true;
+  bool display_comments = false;
 
   if (lexer.status()) {
     for (const Token &token : tokens)
