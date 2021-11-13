@@ -14,4 +14,9 @@ BEGIN
    INT z;
    z := f2(x,y) + f2(y,x);
    WRITE (z, "A4.output");
+
+   if (z < 0) then
+      WRITE("A4.output", "A4.output", "A4.output");
+   else
+      WRITE("A4.output", "A4.output", "A4.output");
 END

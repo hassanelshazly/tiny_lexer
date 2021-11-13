@@ -53,10 +53,7 @@ public:
         return Token(match_literal_int(), INT_LITERAL, line);
       } else if (isalpha(c)) {
         string word = match_identifier();
-        if (is_reserved(word))
-          return Token(word, KEYWORD, line);
-        else
-          return Token(word, IDENTIFIER, line);
+        return Token(word, is_reserved(to_upper(word)) ? KEYWORD : IDENTIFIER, line);
       } else {
         log_error("Unexpected character: '" + string(1, next_line()) + "'");
         return Token();
@@ -161,6 +158,13 @@ private:
     return ch;
   }
 
+  string to_upper(string str) {
+    for (auto &c : str) {
+      c = toupper(c);
+    }
+    return str;
+  }
+
   bool eof() const { return index >= m_text.length(); }
   bool is_reserved(string word) const { return reserved.count(word); }
   bool is_symbol(char ch) const { return symbols.count(ch); }
@@ -176,7 +180,7 @@ private:
 private:
   inline static const set<string> reserved = {"WRITE",   "READ",  "IF",  "ELSE",
                                               "RETURN ", "BEGIN", "END", "MAIN",
-                                              "STRING ", "INT",   "REAL"};
+                                              "STRING ", "INT",   "REAL", "THEN"};
 
   inline static const set<char> symbols = {'+', '-', '/', '*', '=', '(',
                                            ')', '<', '>', ';', ','};

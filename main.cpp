@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
   code.resize(input_file.tellg());
   input_file.seekg(0, ios::beg);
   input_file.read(&code[0], code.size());
+  input_file.close();
 
   Lexer lexer(code);
   vector<Token> tokens = lexer.get_tokens();
