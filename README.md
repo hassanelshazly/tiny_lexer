@@ -2,9 +2,9 @@
 
 ## Getting Started
 ```
-$ git clone https://https://github.com/hassanelshazly/huffman_encoder
+$ git clone https://github.com/hassanelshazly/tiny_lexer
 
-$ cd huffman_encoder
+$ cd tiny_lexer
 
 $ make all
 ```
