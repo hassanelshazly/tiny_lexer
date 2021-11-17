@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
+#include <map>
 #include <set>
 #include <sstream>
 #include <string>
@@ -25,7 +26,7 @@ public:
     int x = 0;
     while (!eof()) {
       Token token = next_token();
-      if (token.type() != TokenType::NULL_TOKEN)
+      if (token.type() != TokenType::UNKNOWN)
         res.push_back(token);
     }
     return res;
@@ -42,18 +43,19 @@ public:
 
     try {
       if (c == '"') {
-        return Token(match_literal_string(), STRING_LITERAL, line);
+        return Token(match_literal_string(), STRING, line);
       } else if (c == '{') {
         return Token(match_comment(), COMMENT, line);
       } else if (c == ':') {
-        return Token(match_assign(), STRING_LITERAL, line);
-      } else if (is_symbol(c)) {
-        return Token(string(1, next()), SYMPOL, line);
+        return Token(match_assign(), ASSIGN, line);
+      } else if (pair<bool, TokenType> res = is_symbol(c); res.first) {
+        return Token(string(1, next()), res.second, line);
       } else if (isdigit(c)) {
-        return Token(match_literal_int(), INT_LITERAL, line);
+        return Token(match_literal_int(), NUM, line);
       } else if (isalpha(c)) {
         string word = match_identifier();
-        return Token(word, is_reserved(to_upper(word)) ? KEYWORD : IDENTIFIER, line);
+        pair<bool, TokenType> res = is_keyword(to_upper(word));
+        return Token(word, res.first ? res.second : ID, line);
       } else {
         log_error("Unexpected character: '" + string(1, next_line()) + "'");
         return Token();
@@ -76,7 +78,7 @@ private:
     if (peek() == '\n' || eof()) {
       next_line();
       log_error("Unterminated string");
-      throw UndefindToken();
+      throw UnknownToken();
     }
 
     next();
@@ -109,7 +111,7 @@ private:
     if (eof()) {
       next_line();
       log_error("Unterminated comment");
-      throw UndefindToken();
+      throw UnknownToken();
     }
 
     next();
@@ -123,7 +125,7 @@ private:
     }
 
     log_error("Unexpected character: '" + string(1, next_line()) + "'");
-    throw UndefindToken();
+    throw UnknownToken();
   }
 
   void ignore_white_space() {
@@ -165,9 +167,19 @@ private:
     return str;
   }
 
+  pair<bool, TokenType> is_keyword(string word) const {
+    return keywords.find(word) != keywords.end()
+               ? make_pair(true, keywords.at(word))
+               : make_pair(false, TokenType::UNKNOWN);
+  }
+
+  pair<bool, TokenType> is_symbol(char ch) const {
+    return symbols.find(ch) != symbols.end()
+               ? make_pair(true, symbols.at(ch))
+               : make_pair(false, TokenType::UNKNOWN);
+  }
+
   bool eof() const { return index >= m_text.length(); }
-  bool is_reserved(string word) const { return reserved.count(word); }
-  bool is_symbol(char ch) const { return symbols.count(ch); }
 
   void log_error(string message) {
     ostringstream os;
@@ -178,12 +190,13 @@ private:
   }
 
 private:
-  inline static const set<string> reserved = {"WRITE",   "READ",  "IF",  "ELSE",
-                                              "RETURN ", "BEGIN", "END", "MAIN",
-                                              "STRING ", "INT",   "REAL", "THEN"};
+  inline static const map<string, TokenType> keywords = {
+      {"IF", IF},       {"THEN", THEN},     {"ELSE", ELSE},   {"READ", READ},
+      {"WRITE", WRITE}, {"REPEAT", REPEAT}, {"UNTIL", UNTIL}, {"END", END}};
 
-  inline static const set<char> symbols = {'+', '-', '/', '*', '=', '(',
-                                           ')', '<', '>', ';', ','};
+  inline static const map<char, TokenType> symbols = {
+      {'+', PLUS},   {'-', MINUS},  {'/', DIV}, {'*', MUL},       {'=', EQ},
+      {'(', LPAREN}, {')', RPAREN}, {'<', LT},  {';', SEMICOLON}, {',', COMMA}};
 
 private:
   string m_text;
@@ -192,7 +205,7 @@ private:
   vector<string> m_errors;
   bool m_status = true;
 
-  class UndefindToken : public exception {};
+  class UnknownToken : public exception {};
 };
 
 #endif

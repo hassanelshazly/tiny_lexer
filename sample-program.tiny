@@ -1,22 +1,10 @@
-{ this is a comment line in the sample program }
-INT f2(INT x, INT y)
-BEGIN
-   INT z;
-   z := x*x - y*y;
-   RETURN z;
-END
-INT MAIN f1()
-BEGIN
-   INT x;
-   READ(x, "A41.input");
-   INT y;
-   READ(y, "A42.input");
-   INT z;
-   z := f2(x,y) + f2(y,x);
-   WRITE (z, "A4.output");
-
-   if (z < 0) then
-      WRITE("A4.output", "A4.output", "A4.output");
-   else
-      WRITE("A4.output", "A4.output", "A4.output");
-END
+{ Sample program in TINY language – computes factorial }
+read y; {input an integer }
+if 0 < x then { don’t compute if x <= 0 }
+   fact := 1;
+   repeat
+      fact := fact * x;
+      x := x - 1
+   until x = 0;
+   write fact { output factorial of x }
+end
